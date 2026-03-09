@@ -143,6 +143,30 @@ def validate():
             "Missing secondary effects for faults: " + ", ".join(sorted(missing_effects))
         )
 
+    unknown_primary = effect_names - short_descriptions
+    if unknown_primary:
+        raise ValueError(
+            "Secondary effects reference unknown primary faults: "
+            + ", ".join(sorted(unknown_primary))
+        )
+
+    for row in secondary_effects:
+        fault = row["fault"]
+        derived_faults = [
+            item.strip()
+            for item in row["derived_secondary_faults"].split(";")
+            if item.strip()
+        ]
+        if not derived_faults:
+            raise ValueError(f"{fault}: missing derived_secondary_faults mapping")
+        unknown_derived = [item for item in derived_faults if item not in short_descriptions]
+        if unknown_derived:
+            raise ValueError(
+                f"{fault}: unknown derived faults: {', '.join(sorted(unknown_derived))}"
+            )
+        if fault in derived_faults:
+            raise ValueError(f"{fault}: self-reference is not allowed")
+
     missing_avionics = EXPECTED_AVIONICS - set(subsystem_counts)
     if missing_avionics:
         raise ValueError(

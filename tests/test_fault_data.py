@@ -82,6 +82,14 @@ class FaultDataTests(unittest.TestCase):
                 msg=f"{path.name} should restart numbering at 001",
             )
 
+    def test_secondary_effects_reference_existing_faults(self):
+        summary = validate()
+        self.assertEqual(
+            summary["secondary_effect_count"],
+            summary["fault_count"],
+            msg="secondary effects should map one-to-one with existing faults",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -83,8 +83,8 @@ Columns:
 
 Notes:
 
-- secondary effects describe plausible propagation paths and operational consequences
-- secondary effects are written from the perspective of airborne mission impact and flight safety
+- secondary effects map each fault to one or more existing fault names from `data/faults/`
+- mappings are written as plausible fault-propagation links rather than free-text consequence phrases
 - these relationships are analytical assumptions, not guaranteed deterministic outcomes
 
 ## Current Status
