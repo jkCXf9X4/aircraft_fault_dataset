@@ -2,6 +2,7 @@ import csv
 import unittest
 from pathlib import Path
 
+from scripts.export_fault_catalog import EXPORT_HEADERS, build_export_rows
 from scripts.validate_fault_data import (
     EXPECTED_AVIONICS,
     FILE_ID_PREFIXES,
@@ -89,6 +90,16 @@ class FaultDataTests(unittest.TestCase):
             summary["fault_count"],
             msg="secondary effects should map one-to-one with existing faults",
         )
+
+    def test_flattened_export_contains_expected_columns_and_rows(self):
+        summary = validate()
+        rows = build_export_rows()
+        self.assertEqual(len(rows), summary["fault_count"])
+        self.assertEqual(set(rows[0]), set(EXPORT_HEADERS))
+        for row in rows:
+            self.assertTrue(row["fault_id"])
+            self.assertTrue(row["source_file"].endswith(".csv"))
+            self.assertTrue(row["derived_secondary_faults"])
 
 
 if __name__ == "__main__":
