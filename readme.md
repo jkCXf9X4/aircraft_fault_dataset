@@ -15,10 +15,15 @@ The current repository content focuses on:
   - baseline aircraft specification
   - subsystem-level assumptions
   - federated avionics and mission systems breakdown with multiple dedicated avionics computers
-- `data/faults.csv`
-  - in-flight fault catalog with subsystem or avionics computer, severity, short description, long description, and pilot actions
+- `data/faults/`
+  - one CSV per subsystem or avionics computer
+  - each file uses the same in-flight fault schema
 - `data/fault_secondary_effects.csv`
   - mapping between primary faults and likely downstream or secondary effects
+- `scripts/validate_fault_data.py`
+  - schema and coverage validation for the split fault dataset
+- `tests/test_fault_data.py`
+  - automated checks for dataset consistency and coverage
 
 ## Aircraft Model Scope
 
@@ -49,7 +54,7 @@ The avionics model is intentionally split into multiple computers to support mor
 
 ## Dataset Files
 
-### `data/faults.csv`
+### `data/faults/*.csv`
 
 Columns:
 
@@ -62,10 +67,12 @@ Columns:
 
 Notes:
 
+- `fault_id` is unique across the repo by combining a file-specific prefix with a local sequence that starts at `001` in each file
 - `short_description` is limited to short labels suitable for compact displays and dataset indexing
 - `severity` uses qualitative operational impact levels: `medium`, `high`, and `critical`
 - entries are written as in-flight operational fault cases rather than depot or line-maintenance discrepancies
 - `pilot_actions` captures immediate cockpit response and recovery intent
+- each file should contain faults for exactly one subsystem or one avionics computer
 
 ### `data/fault_secondary_effects.csv`
 
@@ -85,15 +92,41 @@ Notes:
 The repository currently contains:
 
 - a baseline aircraft design assumptions document
-- an initial in-flight fault catalog covering propulsion, fuel, electrical, flight control, hydraulic, avionics, ECS, and landing gear
+- an initial split in-flight fault catalog covering propulsion, fuel, electrical, flight control, hydraulic, avionics, ECS, and landing gear
 - computer-specific avionics fault cases for `MMC`, `SMC`, `RPC`, `NAVC`, `DPC`, and `CCC`
 - an initial secondary-effects dataset for those faults
+
+## Validation And Tests
+
+Run the dataset validator:
+
+```bash
+python3 scripts/validate_fault_data.py
+```
+
+Run the automated tests:
+
+```bash
+python3 -m unittest discover -s tests
+```
+
+Current test coverage checks:
+
+- CSV schema consistency across all split fault files
+- one-subsystem-per-file structure
+- minimum of five fault cases per subsystem or avionics-computer file
+- minimum of ten fault cases for the major subsystems: propulsion, fuel system, electrical, and hydraulic
+- fault ID prefix and per-file `001` sequencing
+- short description length constraints
+- valid severity levels and severity coverage
+- dedicated avionics computer coverage
+- linkage between primary faults and secondary-effects rows
 
 ## Suggested Next Steps
 
 - add phase-of-flight and pilot workload fields to the fault dataset
 - add machine-readable links between subsystem assumptions and fault entries
-- create scripts for validating CSV schema and generating derived analysis views
+- generate derived analysis views such as severity-by-subsystem and propagation summaries
 
 ### Focused Fault Evaluation Implications
 
